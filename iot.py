@@ -8,7 +8,10 @@ def mqttpub(cfgFile, dataDic):
     options = ibmiotf.device.ParseConfigFile(cfgFile)
     deviceCli = ibmiotf.device.Client(options)
     print 'Publish data to topic on IoTF'
-    myData= dataDic
+    ts=str(datetime.datetime.now())
+    dataDic["ts"]=ts
+    deviceCli.connect()
+    myData= { "d": dataDic}
     myQosLevel=0
     deviceCli.publishEvent(event="status", msgFormat="json", data=myData, qos=myQosLevel)
 
