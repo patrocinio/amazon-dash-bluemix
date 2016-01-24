@@ -3,6 +3,7 @@ import sys, json, datetime
 import ibmiotf.device
 from ibmiotf.codecs import jsonIotfCodec
 import argparse
+from scapy.all import *
 
 def mqttpub(cfgFile, dataDic):
     options = ibmiotf.device.ParseConfigFile(cfgFile)
@@ -24,10 +25,18 @@ def getVarFromFile(fname):
             iot_dict[key.strip()] = val.strip()
     return (iot_dict)
 
+def arp_display(pkt):
+    if pkt[ARP].op == 1: #who-has (request)
+        if pkt[ARP].psrc == '0.0.0.0': # ARP Probe
+            if pkt[ARP].hwsrc == '74:c2:46:05:99:37': # SmartWater
+                print "smartwater"
+                pubpayload = mqttpub(cfgFile, dataDic)
+            else:
+                print "ARP Probe from unknown device: " + pkt[ARP].hwsrc
+
+
 def main():
-    cfgFile, datFile = args.c, args.f
-    dataDic = getVarFromFile(datFile)
-    pubpayload = mqttpub(cfgFile, dataDic)
+    print sniff(prn=arp_display, filter="arp", store=0, count=10)
 
 # Standard boilerplate to call the main() function.
 if __name__ == '__main__':
@@ -35,4 +44,6 @@ if __name__ == '__main__':
     parser.add_argument('-c', required=True, help='Appliance config file')
     parser.add_argument('-f', required=True, help='Appliance data file - path and filename')
     args = parser.parse_args()
+    cfgFile, datFile = args.c, args.f
+    dataDic = getVarFromFile(datFile)
     main()
