@@ -20,15 +20,15 @@ def getVarFromFile(fname):
     iot_dict = {}
     with open(fname) as file:
         for line in file:
-            print line
             key , val = line.strip().split('=')
             iot_dict[key.strip()] = val.strip()
     return (iot_dict)
 
 def arp_display(pkt):
+    print dataDic["mac"]
     if pkt[ARP].op == 1: #who-has (request)
         if pkt[ARP].psrc == '0.0.0.0': # ARP Probe
-            if pkt[ARP].hwsrc == '74:c2:46:05:99:37': # SmartWater
+            if pkt[ARP].hwsrc == dataDic["mac"]: # SmartWater
                 print "smartwater"
                 pubpayload = mqttpub(cfgFile, dataDic)
             else:
